@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Focus &amp; Tasks</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-hover: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-text: #0f172a;
+      --danger: #f87171;
+      --success: #4ade80;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .modes {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.15s ease;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+
+    .timer-display {
+      text-align: center;
+      font-size: 4rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
+      margin: 0.75rem 0 1.25rem;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: var(--accent-text);
+      border: none;
+      padding: 0.7rem 1.75rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.7rem 1.25rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button.secondary:hover,
+    .mode-btn:not(.active):hover {
+      background: var(--surface-hover);
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .task-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .task-form input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.65rem 0.85rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .task-form input:focus {
+      border-color: var(--accent);
+    }
+
+    .task-form button {
+      background: var(--accent);
+      color: var(--accent-text);
+      border: none;
+      padding: 0 1rem;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .task-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.65rem 0.85rem;
+      border-radius: 10px;
+      gap: 0.75rem;
+    }
+
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .task-left input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .task-text.done {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0 0.25rem;
+    }
+
+    .delete-btn:hover {
+      color: var(--danger);
+    }
+
+    .status {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="card" aria-label="Focus Timer">
+      <div class="modes">
+        <button class="mode-btn active" data-seconds="1500">Focus (25m)</button>
+        <button class="mode-btn" data-seconds="300">Short Break (5m)</button>
+        <button class="mode-btn" data-seconds="900">Long Break (15m)</button>
+      </div>
+      <div id="timer" class="timer-display">25:00</div>
+      <div class="controls">
+        <button id="toggleBtn" class="primary">Start</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+      </div>
+      <div id="status" class="status">Ready to focus</div>
+    </section>
+
+    <section class="card" aria-label="Task List">
+      <h2>Session Tasks</h2>
+      <form id="taskForm" class="task-form">
+        <input id="taskInput" type="text" placeholder="Add a task..." required />
+        <button type="submit">Add</button>
+      </form>
+      <ul id="taskList" class="task-list"></ul>
+    </section>
+  </main>
+
+  <script>
+    const timerEl = document.getElementById("timer");
+    const toggleBtn = document.getElementById("toggleBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const statusEl = document.getElementById("status");
+    const modeBtns = document.querySelectorAll(".mode-btn");
+
+    const taskForm = document.getElementById("taskForm");
+    const taskInput = document.getElementById("taskInput");
+    const taskList = document.getElementById("taskList");
+
+    let duration = 1500;
+    let remaining = duration;
+    let intervalId = null;
+    let tasks = JSON.parse(localStorage.getItem("focus_tasks_v1") || "[]");
+
+    function formatTime(sec) {
+      const mins = Math.floor(sec / 60);
+      const secs = sec % 60;
+      return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+
+    function renderTimer() {
+      timerEl.textContent = formatTime(remaining);
+      document.title = `${formatTime(remaining)} — Focus & Tasks`;
+    }
+
+    function stopTimer() {
+      clearInterval(intervalId);
+      intervalId = null;
+      toggleBtn.textContent = "Start";
+    }
+
+    function startTimer() {
+      if (intervalId) return;
+      toggleBtn.textContent = "Pause";
+      statusEl.textContent = "Timer running...";
+
+      intervalId = setInterval(() => {
+        remaining -= 1;
+        renderTimer();
+
+        if (remaining <= 0) {
+          stopTimer();
+          remaining = 0;
+          renderTimer();
+          statusEl.textContent = "Time is up! Take a breather or start next round.";
+        }
+      }, 1000);
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      if (intervalId) {
+        stopTimer();
+        statusEl.textContent = "Paused";
+      } else {
+        if (remaining === 0) remaining = duration;
+        startTimer();
+      }
+    });
+
+    resetBtn.addEventListener("click", () => {
+      stopTimer();
+      remaining = duration;
+      renderTimer();
+      statusEl.textContent = "Timer reset";
+    });
+
+    modeBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        modeBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        stopTimer();
+        duration = Number(btn.dataset.seconds);
+        remaining = duration;
+        renderTimer();
+        statusEl.textContent = `Switched to ${btn.textContent}`;
+      });
+    });
+
+    function saveTasks() {
+      localStorage.setItem("focus_tasks_v1", JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = "";
+      tasks.forEach((task) => {
+        const li = document.createElement("li");
+        li.className = "task-item";
+
+        const label = document.createElement("label");
+        label.className = "task-left";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.done;
+        checkbox.addEventListener("change", () => {
+          task.done = checkbox.checked;
+          saveTasks();
+          renderTasks();
+        });
+
+        const span = document.createElement("span");
+        span.className = `task-text ${task.done ? "done" : ""}`;
+        span.textContent = task.text;
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "delete-btn";
+        delBtn.type = "button";
+        delBtn.setAttribute("aria-label", `Delete ${task.text}`);
+        delBtn.textContent = "×";
+        delBtn.addEventListener("click", () => {
+          tasks = tasks.filter((t) => t.id !== task.id);
+          saveTasks();
+          renderTasks();
+        });
+
+        label.append(checkbox, span);
+        li.append(label, delBtn);
+        taskList.appendChild(li);
+      });
+    }
+
+    taskForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = taskInput.value.trim();
+      if (!text) return;
+      tasks.unshift({ id: crypto.randomUUID(), text, done: false });
+      saveTasks();
+      renderTasks();
+      taskInput.value = "";
+    });
+
+    renderTimer();
+    renderTasks();
+  </script>
+</body>
+</html>
